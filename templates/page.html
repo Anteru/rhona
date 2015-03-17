@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ page ['title'] }}</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="/static/pastie.css" type="text/css">
+	<link rel="stylesheet" href="/static/default.css" type="text/css">
+</head>
+<body>
+	<div id="content">
+		{% if 'title' in page %}
+			<h1 class="page-title">{{ page['title'] }}</h1>
+		{% end %}
+		{{ page ['body'] }}
+	</div>
+</body>
+</html>

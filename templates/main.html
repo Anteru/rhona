@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Index</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="/static/pastie.css" type="text/css">
+	<link rel="stylesheet" href="/static/default.css" type="text/css">
+</head>
+<body>
+	<div id="content">
+		<ul>
+		{% for item in items %}
+			<li><a href="/wiki/{{ item }}">{{ item }}</a></li>
+		{% end %}
+		</ul>
+	</div>
+</body>
+</html>
