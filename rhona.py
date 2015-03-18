@@ -11,10 +11,12 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         # We write a simple index here
         items = []
-        for root, _, files in os.walk ('wiki'):
+        for root, _, files in os.walk ('content'):
             for name in filter (lambda x: x.endswith ('.rst'), files):
                 name = name [:-4]
-                items.append (os.path.join (root[5:], name))
+                p = os.path.join (root[8:], name)
+                p = p.replace ('\\', '/')
+                items.append (p)
 
         self.render ('main.html', items=items)
 
@@ -50,16 +52,19 @@ class ImageFixupVisitor(docutils.nodes.SparseNodeVisitor):
 
 class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
-        filename = os.path.join ('wiki', path) + '.rst'
+        filename = os.path.join ('content', path) + '.rst'
         if os.path.exists (filename):
             dt = docutils.core.publish_doctree (
-                open ('wiki/' + path + '.rst', 'r', encoding='utf-8').read ())
+                open (filename, 'r', encoding='utf-8').read ())
 
             linkFixup = LinkFixupTransform (dt)
             linkFixup.apply ()
 
             r = PublishPartsFromDoctree (dt,
-                writer = docutils.writers.html4css1.Writer ())
+                writer = docutils.writers.html4css1.Writer (),
+                settings_overrides = {
+                    'compact_lists' : False
+                })
             self.render ('page.html', page = r)
         else:
             self.send_error (404)

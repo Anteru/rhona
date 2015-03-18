@@ -8,10 +8,13 @@
 </head>
 <body>
 	<div id="content">
-		{% if 'title' in page %}
+		{% if 'title' in page and page ['title'] %}
 			<h1 class="page-title">{{ page['title'] }}</h1>
 		{% end %}
 		{{ page ['body'] }}
+
+		<div id="footer">
+		</div>
 	</div>
 </body>
 </html>

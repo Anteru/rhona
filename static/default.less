@@ -1,0 +1,44 @@
+// out: default.css, sourcemap: false, compress: true
+
+body {
+	font-family: sans-serif;
+
+	#content {
+		max-width: 800px;
+		margin: auto;
+	}
+
+	h1.page-title {
+		border-bottom: 1px solid #CCC;
+		font-size: 250%;
+	}
+}
+
+code, tt {
+	background-color: #EEE;
+	border: 1px solid #DDD;
+	padding: 2px;
+}
+
+div.note {
+	box-shadow: 2px 2px 4px #AAA;
+	padding: 0;
+
+	p {
+		margin: 0;
+		padding: 4px;
+
+		&.admonition-title {
+			font-weight: bold;
+		}
+	}
+}
+
+div.note {
+	background-color: #EEE;
+	p {
+		&.admonition-title {
+			background-color: #DDD;
+		}
+	}
+}
