@@ -7,6 +7,7 @@ import pygments_rst
 import tornado.template
 import os
 import pathlib
+import time
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -64,12 +65,7 @@ class ImageFixupTransform(docutils.transforms.Transform):
 
 class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
-        passthroughName = os.path.join ('content', path)
-        if os.path.exists (passthroughName):
-            self.write (open (passthroughName, 'rb').read ())
-            self.finish ()
-            return
-
+        startTime = time.clock ()
         filename = os.path.join ('content', path) + '.rst'
         if os.path.exists (filename):
             dt = docutils.core.publish_doctree (
@@ -84,12 +80,17 @@ class WikiHandler(tornado.web.RequestHandler):
             parentPath = str (pathlib.Path (path).parent)
             imageFixup.apply (parentPath)
 
-            r = PublishPartsFromDoctree (dt,
+            page = PublishPartsFromDoctree (dt,
                 writer = docutils.writers.html4css1.Writer (),
                 settings_overrides = {
                     'compact_lists' : False
                 })
-            self.render ('page.html', page = r)
+
+            meta = {
+                'generation-time' : round ((time.clock () - startTime) * 1000, 2)
+            }
+
+            self.render ('page.html', page = page, meta = meta)
         else:
             self.send_error (404)
 

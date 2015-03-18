@@ -1,7 +1,14 @@
-Section 1
-=========
+Test header
+===========
 
-Some code here:
+This is some example text. It contains **bold**, *italic* and ``monospace`` text. We can use everything `reStructedText <http://docutils.sourceforge.net/rst.html>`_ provides, including blocks like:
+
+.. note:: This is an example note.
+
+Example code
+------------
+
+This is a subsection, and should render with a smaller font size. In this section, we show some example code:
 
 .. code-block:: c++
 
@@ -18,7 +25,7 @@ Some code here:
 			if n ['refuri'] [0] == '/':
 				n ['refuri'] = '/wiki' + n ['refuri']
 
-Subsection
-----------
+Another subsection
+------------------
 
-See also `the installation page </installation>`_
+Here is an internal link to the `installation page </installation>`_
