@@ -6,13 +6,14 @@ import docutils.writers.html4css1
 import pygments_rst
 import tornado.template
 import os
+import pathlib
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         # We write a simple index here
         items = []
         for root, _, files in os.walk ('content'):
-            for name in filter (lambda x: x.endswith ('.rst'), files):
+            for name in filter (lambda x: x.endswith ('.rst'), sorted (files)):
                 name = name [:-4]
                 p = os.path.join (root[8:], name)
                 p = p.replace ('\\', '/')
@@ -48,17 +49,40 @@ class LinkFixupTransform(docutils.transforms.Transform):
         self.document.walk(visitor)
 
 class ImageFixupVisitor(docutils.nodes.SparseNodeVisitor):
-    pass
+    def __init__ (self, doc, basepath):
+        super (ImageFixupVisitor, self).__init__ (doc)
+        self.__basepath = basepath
+
+    def visit_image (self, n):
+        if n ['uri'].startswith ('./'):
+            n ['uri'] = '/wiki-static/' + self.__basepath + '/' + n ['uri'][2:]
+
+class ImageFixupTransform(docutils.transforms.Transform):
+    def apply(self, basepath):
+        visitor = ImageFixupVisitor(self.document, basepath)
+        self.document.walk (visitor)
 
 class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
+        passthroughName = os.path.join ('content', path)
+        if os.path.exists (passthroughName):
+            self.write (open (passthroughName, 'rb').read ())
+            self.finish ()
+            return
+
         filename = os.path.join ('content', path) + '.rst'
         if os.path.exists (filename):
             dt = docutils.core.publish_doctree (
-                open (filename, 'r', encoding='utf-8').read ())
+                open (filename, 'r', encoding='utf-8').read (),
+                settings_overrides = {
+                    'smart_quotes' : True
+                })
 
             linkFixup = LinkFixupTransform (dt)
             linkFixup.apply ()
+            imageFixup = ImageFixupTransform (dt)
+            parentPath = str (pathlib.Path (path).parent)
+            imageFixup.apply (parentPath)
 
             r = PublishPartsFromDoctree (dt,
                 writer = docutils.writers.html4css1.Writer (),
@@ -72,7 +96,8 @@ class WikiHandler(tornado.web.RequestHandler):
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/wiki/(.+)", WikiHandler),
-    (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static/"})
+    (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static/"}),
+    (r"/wiki-static/(.*)", tornado.web.StaticFileHandler, {"path": "./content/"})
 ], template_path = 'templates', autoescape=None, debug=True)
 
 if __name__ == "__main__":

@@ -1,17 +1,64 @@
 // out: default.css, sourcemap: false, compress: true
 
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,700,700italic,300,300italic,800,800italic);
+
+.box-shadow-default {
+	box-shadow: 2px 2px 4px #AAA;
+}
+
 body {
-	font-family: sans-serif;
+	font-family: 'Open Sans', sans-serif;
+	padding: 0;
+	margin: 0;
+}
 
-	#content {
-		max-width: 800px;
-		margin: auto;
-	}
+#page {
+}
 
-	h1.page-title {
+#content {
+	max-width: 800px;
+	padding: 16px;
+	margin: auto;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-weight: 400;
+	color: #333;
+}
+
+h1 {
+	font-size: 1.8rem;
+
+	&.page-title {
 		border-bottom: 1px solid #CCC;
-		font-size: 250%;
+		font-size: 2rem;
+		font-weight: 500;
 	}
+}
+
+h2 {
+	font-size: 1.5rem;
+}
+
+h3 {
+	font-size: 1.3rem;
+}
+
+h4 {
+	font-size: 1.1rem;
+}
+
+a {
+	color: rgba(32,96,128,1);
+
+	&:hover {
+		color: red;
+	}
+}
+
+img {
+	width: 100%;
+	.box-shadow-default;
 }
 
 code, tt {
@@ -21,7 +68,7 @@ code, tt {
 }
 
 div.note {
-	box-shadow: 2px 2px 4px #AAA;
+	.box-shadow-default;
 	padding: 0;
 
 	p {

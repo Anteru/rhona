@@ -7,12 +7,14 @@
 	<link rel="stylesheet" href="/static/default.css" type="text/css">
 </head>
 <body>
-	<div id="content">
-		<ul>
-		{% for item in items %}
-			<li><a href="/wiki/{{ item }}">{{ item }}</a></li>
-		{% end %}
-		</ul>
+	<div id="page">
+		<div id="content">
+			<ul>
+			{% for item in items %}
+				<li><a href="/wiki/{{ item }}">{{ item }}</a></li>
+			{% end %}
+			</ul>
+		</div>
 	</div>
 </body>
 </html>
