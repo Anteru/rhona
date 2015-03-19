@@ -4,7 +4,10 @@
 	<title>{{ page ['title'] }}</title>
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="/static/pastie.css" type="text/css">
+
+	{% if meta ['style'] == 'default' %}
 	<link rel="stylesheet" href="/static/default.css" type="text/css">
+	{% end %}
 </head>
 <body>
 	<div id="page">
@@ -15,7 +18,17 @@
 		{{ page ['body'] }}
 		</div>
 		<div id="footer">
-			Page generated in {{ meta ['generation-time'] }} ms.
+			<div class="actions">
+				<a href="/">Index</a>
+				{% if meta ['style'] == 'default' %}
+					<a href="{{ meta ['url'] }}?style=unstyled">Show unstyled</a>
+				{% else %}
+					<a href="{{ meta ['url'] }}">Show styled</a>
+				{% end %}
+			</div>
+			<div class="info">
+				Page generated in {{ meta ['generation-time'] }} ms.
+			</div>
 		</div>
 	</div>
 </body>

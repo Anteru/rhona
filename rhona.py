@@ -39,46 +39,40 @@ def PublishPartsFromDoctree (document, destination_path=None,
     pub.publish(enable_exit_status=enable_exit_status)
     return pub.writer.parts
 
-class LinkFixupVisitor(docutils.nodes.SparseNodeVisitor):
-    def visit_reference (self, n):
-        if n ['refuri'] [0] == '/':
-            n ['refuri'] = '/wiki' + n ['refuri']
-
-class LinkFixupTransform(docutils.transforms.Transform):
-    def apply(self):
-        visitor = LinkFixupVisitor(self.document)
-        self.document.walk(visitor)
-
-class ImageFixupVisitor(docutils.nodes.SparseNodeVisitor):
+class WikiFixupVisitor(docutils.nodes.SparseNodeVisitor):
     def __init__ (self, doc, basepath):
-        super (ImageFixupVisitor, self).__init__ (doc)
+        super (WikiFixupVisitor, self).__init__ (doc)
         self.__basepath = basepath
+
+    def visit_reference (self, n):
+        if n ['refuri'].startswith ('/'):
+            n ['refuri'] = '/wiki' + n ['refuri']
+        elif n ['refuri'].startswith ('./'):
+            n ['refuri'] = '/wiki/' + self.__basepath + '/' + n ['refuri'][2:]
 
     def visit_image (self, n):
         if n ['uri'].startswith ('./'):
             n ['uri'] = '/wiki-static/' + self.__basepath + '/' + n ['uri'][2:]
 
-class ImageFixupTransform(docutils.transforms.Transform):
+class WikiFixupTransform(docutils.transforms.Transform):
     def apply(self, basepath):
-        visitor = ImageFixupVisitor(self.document, basepath)
+        visitor = WikiFixupVisitor(self.document, basepath)
         self.document.walk (visitor)
 
 class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
         startTime = time.clock ()
         filename = os.path.join ('content', path) + '.rst'
-        if os.path.exists (filename):
+        if os.path.exists (filename):            
             dt = docutils.core.publish_doctree (
                 open (filename, 'r', encoding='utf-8').read (),
                 settings_overrides = {
                     'smart_quotes' : True
                 })
 
-            linkFixup = LinkFixupTransform (dt)
-            linkFixup.apply ()
-            imageFixup = ImageFixupTransform (dt)
+            wikiFixup = WikiFixupTransform (dt)
             parentPath = str (pathlib.Path (path).parent)
-            imageFixup.apply (parentPath)
+            wikiFixup.apply (parentPath)
 
             page = PublishPartsFromDoctree (dt,
                 writer = docutils.writers.html4css1.Writer (),
@@ -87,7 +81,9 @@ class WikiHandler(tornado.web.RequestHandler):
                 })
 
             meta = {
-                'generation-time' : round ((time.clock () - startTime) * 1000, 2)
+                'generation-time' : round ((time.clock () - startTime) * 1000, 2),
+                'style' : self.get_query_argument ('style', 'default'),
+                'url' : '/wiki/' + path
             }
 
             self.render ('page.html', page = page, meta = meta)
