@@ -3,7 +3,7 @@ import tornado.web
 import docutils
 import docutils.core
 import docutils.writers.html4css1
-import pygments_rst
+from . import pygments_rst
 import tornado.template
 import os
 import pathlib
@@ -48,11 +48,11 @@ class WikiFixupVisitor(docutils.nodes.SparseNodeVisitor):
         if n ['refuri'].startswith ('/'):
             n ['refuri'] = '/wiki' + n ['refuri']
         elif n ['refuri'].startswith ('./'):
-            n ['refuri'] = '/wiki/' + self.__basepath + '/' + n ['refuri'][2:]
+            n ['refuri'] = '/wiki/' + self.__basepath + n ['refuri'][1:]
 
     def visit_image (self, n):
         if n ['uri'].startswith ('./'):
-            n ['uri'] = '/wiki-static/' + self.__basepath + '/' + n ['uri'][2:]
+            n ['uri'] = '/wiki-static/' + self.__basepath + n ['uri'][1:]
 
 class WikiFixupTransform(docutils.transforms.Transform):
     def apply(self, basepath):
@@ -63,7 +63,7 @@ class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
         startTime = time.clock ()
         filename = os.path.join ('content', path) + '.rst'
-        if os.path.exists (filename):            
+        if os.path.exists (filename):
             dt = docutils.core.publish_doctree (
                 open (filename, 'r', encoding='utf-8').read (),
                 settings_overrides = {
@@ -90,13 +90,16 @@ class WikiHandler(tornado.web.RequestHandler):
         else:
             self.send_error (404)
 
-application = tornado.web.Application([
-    (r"/", MainHandler),
-    (r"/wiki/(.+)", WikiHandler),
-    (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static/"}),
-    (r"/wiki-static/(.*)", tornado.web.StaticFileHandler, {"path": "./content/"})
-], template_path = 'templates', autoescape=None, debug=True)
+class Server:
+    def __init__ (self, port=8888):
+        self.__application = tornado.web.Application([
+            (r"/", MainHandler),
+            (r"/wiki/(.+)", WikiHandler),
+            (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static/"}),
+            (r"/wiki-static/(.*)", tornado.web.StaticFileHandler, {"path": "./content/"})
+        ], template_path = 'templates', autoescape=None, debug=True)
+        self.__port = port
 
-if __name__ == "__main__":
-    application.listen(8888)
-    tornado.ioloop.IOLoop.instance().start()
+    def Run (self):
+        self.__application.listen (self.__port)
+        tornado.ioloop.IOLoop.instance().start()
