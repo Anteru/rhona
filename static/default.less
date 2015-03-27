@@ -6,6 +6,10 @@
 	box-shadow: 2px 2px 4px #AAA;
 }
 
+.strike {
+  text-decoration: line-through;
+}
+
 body {
 	font-family: 'Open Sans', sans-serif;
 	padding: 0;
@@ -20,7 +24,30 @@ body {
 }
 
 #content {
+}
 
+#sidebar {
+	padding: 8px;
+	margin-top: 16px;
+	font-size: 0.9em;
+	padding-left: 16px;
+	max-width: 240px;
+	.box-shadow-default;
+	margin-left: 16px;
+	position: fixed;
+	top: 0;
+	margin-left: 816px;
+	background-color: #EEE;
+
+	ul {
+		margin-left: 0;
+		padding-left: 16px;
+
+		li {
+			margin-left: 2px;
+			padding-left: 2px;
+		}
+	}
 }
 
 #footer {
@@ -40,13 +67,9 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 h1 {
-	font-size: 1.8rem;
-
-	&.page-title {
-		border-bottom: 1px solid #CCC;
-		font-size: 2rem;
-		font-weight: 500;
-	}
+	border-bottom: 1px solid #CCC;
+	font-size: 2rem;
+	font-weight: 500;
 }
 
 h2 {

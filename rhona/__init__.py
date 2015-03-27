@@ -3,6 +3,8 @@ import tornado.web
 import docutils
 import docutils.core
 import docutils.writers.html4css1
+import docutils.transforms.parts
+import docutils.nodes
 from . import pygments_rst
 import tornado.template
 import os
@@ -48,7 +50,12 @@ class WikiFixupVisitor(docutils.nodes.SparseNodeVisitor):
         if n ['refuri'].startswith ('/'):
             n ['refuri'] = '/wiki' + n ['refuri']
         elif n ['refuri'].startswith ('./'):
-            n ['refuri'] = '/wiki/' + self.__basepath + n ['refuri'][1:]
+            # Redirect file links to wiki-static
+            p = (os.path.join ('./content', self.__basepath, n ['refuri'][2:]))
+            if os.path.exists (p):
+                n ['refuri'] = '/wiki-static/' + self.__basepath + n ['refuri'][1:]
+            else:
+                n ['refuri'] = '/wiki/' + self.__basepath + n ['refuri'][1:]
 
     def visit_image (self, n):
         if n ['uri'].startswith ('./'):
@@ -59,6 +66,44 @@ class WikiFixupTransform(docutils.transforms.Transform):
         visitor = WikiFixupVisitor(self.document, basepath)
         self.document.walk (visitor)
 
+class BuildTocTransform(docutils.transforms.Transform):
+    def apply(self):
+        return self.build_contents (self.document)
+
+    def build_contents(self, node, level=0):
+        level += 1
+        sections = [sect for sect in node if isinstance(sect, docutils.nodes.section)]
+        entries = []
+        for section in sections:
+            item = {}
+            title = section[0]
+            item ['label'] = title.astext()
+            item ['id'] = section.attributes ['ids'][0]
+            item ['children'] = self.build_contents(section, level)
+            entries.append(item)
+        return entries
+
+def TocToHtmlList (toc):
+    def _TocItem (entry):
+        r = '<li><a href="#{0}">{1}</a>'.format (entry ['id'], entry ['label'])
+        if entry ['children']:
+            r += '<ul>'
+            for child in entry ['children']:
+                r += _TocItem (child)
+            r += '</ul>'
+        r += '</li>'
+        return r
+
+    # Top level is the document itself
+    if len (toc) == 1 and toc [0] ['children']:
+        r = '<ul>'
+        for entry in toc [0]['children']:
+            r += _TocItem (entry)
+        r += '</ul>'
+        return r
+    else:
+        return None
+
 class WikiHandler(tornado.web.RequestHandler):
     def get(self, path):
         startTime = time.clock ()
@@ -67,7 +112,8 @@ class WikiHandler(tornado.web.RequestHandler):
             dt = docutils.core.publish_doctree (
                 open (filename, 'r', encoding='utf-8').read (),
                 settings_overrides = {
-                    'smart_quotes' : True
+                    'smart_quotes' : True,
+                    'doctitle_xform' : False
                 })
 
             wikiFixup = WikiFixupTransform (dt)
@@ -79,6 +125,11 @@ class WikiHandler(tornado.web.RequestHandler):
                 settings_overrides = {
                     'compact_lists' : False
                 })
+
+            tocTransform = BuildTocTransform (dt)
+            toc = tocTransform.apply ()
+            page ['toc'] = TocToHtmlList (toc)
+            page ['title']= dt.children [0][0].astext()
 
             meta = {
                 'generation-time' : round ((time.clock () - startTime) * 1000, 2),

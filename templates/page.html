@@ -11,10 +11,15 @@
 </head>
 <body>
 	<div id="page">
-		<div id="content">
-		{% if 'title' in page and page ['title'] %}
-			<h1 class="page-title">{{ page['title'] }}</h1>
+		{% if meta ['style'] == 'default' and page ['toc'] %}
+		<div id="sidebar">
+			<div id="toc">
+				<span class="TOC">Table of contents:</span>
+				{{ page ['toc'] }}
+			</div>
+		</div>
 		{% end %}
+		<div id="content">
 		{{ page ['body'] }}
 		</div>
 		<div id="footer">
