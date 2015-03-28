@@ -151,6 +151,9 @@ class Server:
         ], template_path = 'templates', autoescape=None, debug=True)
         self.__port = port
 
+    def GetListenPort (self):
+        return self.__port
+
     def Run (self):
         self.__application.listen (self.__port)
         tornado.ioloop.IOLoop.instance().start()
