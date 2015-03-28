@@ -8,33 +8,59 @@
 	{% if meta ['style'] == 'default' %}
 	<link rel="stylesheet" href="/static/default.css" type="text/css">
 	{% end %}
+	<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
 </head>
 <body>
-	<div id="page">
+	<div id="rhona-page">
+		<div id="rhona-main">
+			<div id="rhona-content">
+				{{ page ['body'] }}
+			</div>
+			<div id="rhona-footer">
+				<div class="actions">
+					<a href="/">Index</a>
+					{% if meta ['style'] == 'default' %}
+						<a href="{{ meta ['url'] }}?style=unstyled">Show unstyled</a>
+					{% else %}
+						<a href="{{ meta ['url'] }}">Show styled</a>
+					{% end %}
+				</div>
+				<div class="info">
+					Page generated in {{ meta ['generation-time'] }} ms.
+				</div>
+			</div>
+		</div>
 		{% if meta ['style'] == 'default' and page ['toc'] %}
-		<div id="sidebar">
-			<div id="toc">
+		<div id="rhona-sidebar">
+			<div class="rhona-scroll-helper"></div>
+			<div id="rhona-toc">
 				<span class="TOC">Table of contents:</span>
 				{{ page ['toc'] }}
 			</div>
 		</div>
 		{% end %}
-		<div id="content">
-		{{ page ['body'] }}
-		</div>
-		<div id="footer">
-			<div class="actions">
-				<a href="/">Index</a>
-				{% if meta ['style'] == 'default' %}
-					<a href="{{ meta ['url'] }}?style=unstyled">Show unstyled</a>
-				{% else %}
-					<a href="{{ meta ['url'] }}">Show styled</a>
-				{% end %}
-			</div>
-			<div class="info">
-				Page generated in {{ meta ['generation-time'] }} ms.
-			</div>
-		</div>
 	</div>
 </body>
+
+<script>
+$(function() {
+	var cutoff = 16;
+	var sidebar = $('#rhona-sidebar');
+	var scrollHelper = $('#rhona-sidebar .rhona-scroll-helper');
+	var toc = $('#rhona-toc');
+	var tocPadding = sidebar.outerHeight(true)-sidebar.innerHeight();
+	var maximumTopPadding = sidebar.innerHeight () - toc.outerHeight () - tocPadding*2;
+
+	$(window).scroll (function() {
+			var windowTop = $(window).scrollTop();
+
+			if (windowTop > cutoff) {
+				scrollHelper.css ({'height' : Math.min (windowTop-cutoff, maximumTopPadding)});
+			} else {
+				scrollHelper.css ({'height' : 0});
+			}
+	});
+});
+</script>
+
 </html>

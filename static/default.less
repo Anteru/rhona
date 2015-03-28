@@ -16,17 +16,29 @@ body {
 	margin: 0;
 }
 
-#page {
-	max-width: 800px;
+.scroll-helper {
+	display: block;
+	height: 0;
+	width: 1px;
+}
+
+#rhona-page {
 	padding: 16px;
 	margin: auto;
 	padding-top: 0;
+
+	display: flex;
+	flex-direction: row;
+
+  justify-content: center;
 }
 
-#content {
+#rhona-main {
+	order: 0;
+	flex-basis: 800px;
 }
 
-#sidebar {
+#rhona-sidebar {
 	padding: 8px;
 	margin-top: 16px;
 	font-size: 0.9em;
@@ -34,10 +46,13 @@ body {
 	max-width: 240px;
 	.box-shadow-default;
 	margin-left: 16px;
-	position: fixed;
-	top: 0;
-	margin-left: 816px;
 	background-color: #EEE;
+
+	align-content: flex-start;
+	order: 1;
+	flex-basis: 240px;
+	position: fixed:
+	top: 0;
 
 	ul {
 		margin-left: 0;
@@ -50,7 +65,30 @@ body {
 	}
 }
 
-#footer {
+@media (max-width: 1072px) {
+	#rhona-page {
+		flex-direction: column;
+	}
+
+	#rhona-sidebar {
+		order: 0;
+		max-width: 100%;
+		box-shadow: none;
+		margin: 0;
+		margin-top: 16px;
+
+		.rhona-scroll-helper {
+			display: none;
+		}
+	}
+
+	#rhona-main {
+		order: 1;
+	}
+}
+
+#rhona-footer {
+	margin-top: 8px;
 	border-top: 1px solid #CCC;
 	padding-top: 8px;
 	font-size: 0.7em;

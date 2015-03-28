@@ -1,3 +1,0 @@
-include Readme.rst
-recursive-include static *.css
-recursive-include templates *
